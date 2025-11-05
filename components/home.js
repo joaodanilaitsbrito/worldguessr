@@ -121,6 +121,37 @@ export default function Home({ }) {
     const [accountModalPage, setAccountModalPage] = useState("profile");
     const [mapModalClosing, setMapModalClosing] = useState(false);
 
+export default function Home() {
+
+    const { width, height } = useWindowDimensions();
+    const statsRef = useRef();
+	
+    const saveScore = (username, score) => {
+        try {
+            const currentRanking = JSON.parse(localStorage.getItem("ranking") || "[]");
+
+            currentRanking.push({
+                username,
+                score,
+                date: new Date().toISOString()
+            });
+
+            currentRanking.sort((a, b) => b.score - a.score);
+			
+            const topRanking = currentRanking.slice(0, 50);
+
+            localStorage.setItem("ranking", JSON.stringify(topRanking));
+        } catch (e) {
+            console.error("Erro ao salvar ranking", e);
+        }
+    }
+	
+    const [session, setSession] = useState(false);
+    const { data: mainSession } = useSession();
+    const [accountModalOpen, setAccountModalOpen] = useState(false);
+    const [screen, setScreen] = useState("game"); // já pula menu inicial
+    const [loading, setLoading] = useState(false);
+	
     useEffect(() => {
       let hideInt = setInterval(() => {
         if(document.getElementById("cmpPersistentLink")) {
