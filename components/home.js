@@ -121,6 +121,81 @@ export default function Home({ }) {
     const [accountModalPage, setAccountModalPage] = useState("profile");
     const [mapModalClosing, setMapModalClosing] = useState(false);
 
+export default function Home() {
+
+    const { width, height } = useWindowDimensions();
+    const statsRef = useRef();
+	
+    const saveScore = (username, score) => {
+        try {
+            const currentRanking = JSON.parse(localStorage.getItem("ranking") || "[]");
+            currentRanking.push({
+                username,
+                score,
+                date: new Date().toISOString()
+            });
+            currentRanking.sort((a, b) => b.score - a.score);
+            localStorage.setItem("ranking", JSON.stringify(currentRanking.slice(0, 50)));
+        } catch (e) {
+            console.error("Erro ao salvar ranking", e);
+        }
+    }
+
+    const getRanking = () => {
+        try {
+            const ranking = JSON.parse(localStorage.getItem("ranking") || "[]");
+            ranking.sort((a, b) => b.score - a.score);
+            return ranking;
+        } catch (e) {
+            console.error("Erro ao ler ranking", e);
+            return [];
+        }
+    }
+
+	const [rankingOpen, setRankingOpen] = useState(false);
+
+	function RankingModal({ isOpen, onClose }) {
+    const ranking = getRanking();
+
+    if (!isOpen) return null;
+
+    return (
+        <div className="modal">
+            <h2>Ranking</h2>
+            <button onClick={onClose}>Fechar</button>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Posição</th>
+                        <th>Jogador</th>
+                        <th>Pontuação</th>
+                        <th>Data</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {ranking.map((entry, index) => (
+                        <tr key={index}>
+                            <td>{index + 1}</td>
+                            <td>{entry.username}</td>
+                            <td>{entry.score}</td>
+                            <td>{new Date(entry.date).toLocaleString()}</td>
+                        </tr>
+                    ))}
+                </tbody>
+            </table>
+        </div>
+    )
+}
+
+saveScore(session?.token?.username || "Guest", finalScore);
+
+<button onClick={() => setRankingOpen(true)}>Ver Ranking</button>
+
+<RankingModal
+    isOpen={rankingOpen}
+    onClose={() => setRankingOpen(false)}
+/>
+
     useEffect(() => {
       let hideInt = setInterval(() => {
         if(document.getElementById("cmpPersistentLink")) {
